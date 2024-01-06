@@ -122,3 +122,46 @@ class KLDivergence:
             kl_divergences.append(self.__compute_discrete(distrib_p, distrib_q))
 
         return kl_divergences
+
+
+class KLDivergenceVisualizer:
+    """
+    This class plots and stores the KL Divergence values
+    as a function of percentage of leaked training data.
+    """
+
+    def __init__(self):
+        self.default_title = "KL Divergence between the probability\ndistributions of leaked training and testing data"
+        self.default_img_title = "kl_divergence"
+
+    def plot(
+        self,
+        percentages,
+        kl_divergence_values,
+        img_title=None,
+        plot_title=None,
+        save_figure=False,
+    ):
+        """
+        Plot and store a scatter plot of the KL Divergence values.
+        """
+
+        # if titles haven't been passed, use the default ones
+        if plot_title is None:
+            plot_title = self.default_title
+
+        if img_title is None:
+            img_title = self.default_img_title
+
+        # create the scatter plot
+        plt.plot(percentages, kl_divergence_values, marker="o")
+        plt.title(plot_title)
+        plt.xlabel("Percentage of disclosed training data")
+        plt.ylabel("KL Divergence")
+
+        # save the plot as a PNG image
+        if save_figure:
+            plt.savefig(IMAGE_PATH + img_title + ".png", bbox_inches="tight")
+
+        # display the created figure
+        plt.show()
