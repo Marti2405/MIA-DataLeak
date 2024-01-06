@@ -61,3 +61,64 @@ class KLDivergence:
 
         return kl_divergences
 
+    def __compute_discrete(self, distrib_p, distrib_q):
+        """
+        This auxiliary method computes the KL Divergence between 2 discrete
+        distributions of any type passed as lists.
+        """
+
+        # check if all values are greater or equal to zero
+        assert (
+            min(distrib_p) >= 0.0 and min(distrib_q) >= 0.0
+        ), "Probability values should be positive!"
+
+        distrib_p_length = len(distrib_p)
+        distrib_q_length = len(distrib_q)
+
+        # check if the input lists have the same number of elements
+        assert (
+            distrib_p_length == distrib_q_length
+        ), "Distributions must have the same length!"
+
+        kl_divergence = 0
+
+        # compute the KL Divergence
+        for index in range(distrib_p_length):
+            # if value is zero, it adds an epsilon to avoid computation errors
+            if distrib_p[index] == 0.0:
+                distrib_p[index] += self.epsilon
+
+            if distrib_q[index] == 0.0:
+                distrib_q[index] += self.epsilon
+            
+            kl_divergence += distrib_p[index] * np.log(
+                distrib_p[index] / distrib_q[index]
+            )
+
+        return kl_divergence
+
+    def compute_discrete(self, distribs_p, distribs_q):
+        """
+        It computes the KL Divergence between any number of pairs of 
+        distributions of any type defined as lists of values.
+        """
+
+        # treat the case when only a pair of distributions has been passed
+        if type(distribs_p[0]) != list and type(distribs_p[0]) != np.ndarray:
+            return [self.__compute_discrete(distribs_p, distribs_q)]
+
+        # check if each list contains the same number of distributions
+        distrib_p_no = len(distribs_p)
+        distrib_q_no = len(distribs_q)
+
+        assert (
+            distrib_p_no == distrib_q_no
+        ), "Must pass the same number of distributions!"
+
+        kl_divergences = []
+
+        # compute the KL Divergence for each pair of input distributions
+        for distrib_p, distrib_q in zip(distribs_p, distribs_q):
+            kl_divergences.append(self.__compute_discrete(distrib_p, distrib_q))
+
+        return kl_divergences
