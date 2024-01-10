@@ -16,7 +16,9 @@ class Model:
 
         # load the trained model
         self.model = ResNet().to(self.device)
-        self.model.load_state_dict(torch.load(MODEL_PATH + MODEL_NAME))
+        self.model.load_state_dict(
+            torch.load(MODEL_PATH + MODEL_NAME, map_location=self.device)
+        )
 
         # put the network in eval mode
         self.model.eval()
@@ -33,17 +35,13 @@ class Model:
         # for each input image
         for image in tqdm(images):
             # predict logit
-            y_pred = self.model(
-                torch.from_numpy(image)[None, :, :, :].to(self.device)
-            )
+            y_pred = self.model(torch.from_numpy(image)[None, :, :, :].to(self.device))
 
             # convert tensor to numpy array
             y_pred_np = y_pred[0].cpu().detach().numpy()
 
             # convert logits to probabilities
-            y_pred_prob = (
-                np.exp(y_pred_np) / np.exp(y_pred_np).sum()
-            ).tolist()
+            y_pred_prob = (np.exp(y_pred_np) / np.exp(y_pred_np).sum()).tolist()
 
             # store probabilities
             predicted_prob.append(y_pred_prob)
