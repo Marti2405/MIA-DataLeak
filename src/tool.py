@@ -112,7 +112,7 @@ def log_gaussian_plot(gaussian_known: Gaussian, gaussian_private: Gaussian):
     plt.savefig(f"{BASE_DIR}experiment-{i}/gaussian.jpg", dpi=300)
 
 
-def evaluate(percentage):
+def evaluate(percentage, model_name):
     logging.info(f"Started Evaluation For (percentage = {percentage})")
     # get known training dataset and private dataset.
     data_loader = DataLoader(path="../data/raw_dataset")
@@ -138,7 +138,7 @@ def evaluate(percentage):
     test_private_y = y_test[eval_private_idx]
 
     # perform inference and compute the gaussians
-    model = Model("../models", "/baseline_resnet_3_epochs.pth")
+    model = Model("../models", model_name)
     gaussian_analysis = GaussianAnalysis(model)
     membership_predictor = MembershipPredictor(model)
 
@@ -147,6 +147,9 @@ def evaluate(percentage):
     known_loss_array, unknown_loss_array = gaussian_analysis.get_loss_arrays(
         train_known_x, train_private_x, train_known_y, train_private_y
     )
+    gaussian_analysis.plot_loss_arrays(known_loss_array, unknown_loss_array)
+    plt.show()
+    plt.savefig(f"{BASE_DIR}/losses.jpg", dpi=300)
     # get normal dist parameters.
     known_mean, known_std = gaussian_analysis.compute_mean_and_std(known_loss_array)
     private_mean, private_std = gaussian_analysis.compute_mean_and_std(
@@ -190,4 +193,5 @@ def evaluate(percentage):
     log_gaussian_plot(known_gaussian, private_gaussian)
 
 
-evaluate(16)
+models = ["/baseline_resnet.pth", "/baseline_resnet_3_epochs.pth"]
+evaluate(5, models[1])
