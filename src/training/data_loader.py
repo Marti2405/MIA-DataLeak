@@ -12,7 +12,9 @@ class DataLoader:
     it and creates the train and test batches needed for training.
     """
 
-    def __init__(self):
+    def __init__(self, path=DATA_PATH):
+        self.path = path
+
         # train set pre-processor
         self.transform_train = transforms.Compose(
             [
@@ -40,7 +42,7 @@ class DataLoader:
 
         # load train data
         trainset = torchvision.datasets.CIFAR10(
-            root=DATA_PATH, train=True, download=True, transform=self.transform_train
+            root=self.path, train=True, download=True, transform=self.transform_train
         )
 
         if only_store:
@@ -58,7 +60,7 @@ class DataLoader:
 
         # load test data
         testset = torchvision.datasets.CIFAR10(
-            root=DATA_PATH, train=False, download=True, transform=self.transform_test
+            root=self.path, train=False, download=True, transform=self.transform_test
         )
 
         if only_store:

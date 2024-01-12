@@ -8,7 +8,9 @@ class Sampler:
     def __init__(self, seed=SEED):
         self.generator = np.random.default_rng(seed)
 
-    def sample(self, percentage: float) -> tuple[np.ndarray, np.ndarray]:
+    def sample(
+        self, percentage: float, eval_percentage=0.05
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Returns a fraction of the training set.
         Returns equal amount of 'private' images from the test set to calculate a model's losses.
@@ -22,4 +24,9 @@ class Sampler:
         train_idx = self.generator.choice(TRAIN_SIZE - 1, sample_size, replace=False)
         test_idx = self.generator.choice(TEST_SIZE - 1, sample_size, replace=False)
 
-        return train_idx, test_idx
+        size_eval = int(sample_size * eval_percentage)
+
+        eval_train_idx = train_idx[:-size_eval]
+        eval_test_idx = test_idx[:-size_eval]
+
+        return train_idx, test_idx, eval_train_idx, eval_test_idx
