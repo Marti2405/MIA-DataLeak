@@ -33,6 +33,9 @@ class Gaussian:
     def pdf(self, x):
         return self.dist.pdf(x)
 
+    def __repr__(self) -> str:
+        return f"(mu={self.dist.mean}, sigma={self.dist.stdev})"
+
 
 if __name__ == "__main__":
     my_gaussian = Gaussian(1, 2)

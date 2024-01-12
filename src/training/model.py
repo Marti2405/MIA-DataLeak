@@ -2,23 +2,21 @@ import numpy as np
 from tqdm import tqdm
 import torch
 
-import utils
-from data_loader import DataLoader
-from resnet_architecture import ResNet
+from .utils import *
+from .data_loader import DataLoader
+from .resnet_architecture import ResNet
 
 MODEL_PATH = "../../models/"
 MODEL_NAME = "baseline_resnet.pth"
 
 
 class Model:
-    def __init__(self):
-        self.device = utils.get_device()
+    def __init__(self, path=MODEL_PATH, name=MODEL_NAME):
+        self.device = get_device()
 
         # load the trained model
         self.model = ResNet().to(self.device)
-        self.model.load_state_dict(
-            torch.load(MODEL_PATH + MODEL_NAME, map_location=self.device)
-        )
+        self.model.load_state_dict(torch.load(path + name, map_location=self.device))
 
         # put the network in eval mode
         self.model.eval()
