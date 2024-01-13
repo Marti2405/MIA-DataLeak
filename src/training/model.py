@@ -53,12 +53,12 @@ class Model:
 
     def get_loss(self, predicted, labels):
         predicted = torch.tensor(predicted)  # 2500, 10
-        labels = torch.tensor(labels).squeeze().float()  # 2500, 1
+        labels = torch.tensor(labels).reshape().float()  # 2500, 1
         # print(labels.shape, predicted.shape)
         return -torch.sum(labels * torch.log(predicted))
 
     def normalize(self, images, labels):
-        value = self.get_loss()
+        value = self.get_loss(images, labels)
         return np.log(value / (1 - value))
 
 
