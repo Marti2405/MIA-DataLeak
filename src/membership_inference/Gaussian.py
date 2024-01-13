@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from statistics import NormalDist
+import seaborn as sn
 
 
 class Gaussian:
@@ -11,7 +12,7 @@ class Gaussian:
 
     def hist(self):
         sample = np.random.normal(self.dist.mean, self.dist.stdev, 500)
-        plt.hist(sample)
+        sn.kdeplot(sample)
 
     def plot(self):
         self.hist()

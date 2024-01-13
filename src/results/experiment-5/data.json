@@ -1,0 +1,30 @@
+{
+    "train": {
+        "confusion_matrix": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 5000,
+            "fn": 5000
+        },
+        "ratios": {
+            "tpr": 0.0,
+            "fpr": 0.0,
+            "tnr": 100.0,
+            "fnr": 100.0
+        }
+    },
+    "test": {
+        "confusion_matrix": {
+            "tp": 0,
+            "fp": 0,
+            "tn": 4750,
+            "fn": 4750
+        },
+        "ratios": {
+            "tpr": 0.0,
+            "fpr": 0.0,
+            "tnr": 100.0,
+            "fnr": 100.0
+        }
+    }
+}

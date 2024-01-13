@@ -1,10 +1,12 @@
 import numpy as np
 from tqdm import tqdm
 import torch
+from torch.nn.functional import softmax, cross_entropy
 
 from .utils import *
 from .data_loader import DataLoader
 from .resnet_architecture import ResNet
+from .lenet_architecture import Net
 
 MODEL_PATH = "../../models/"
 MODEL_NAME = "baseline_resnet.pth"
@@ -15,7 +17,7 @@ class Model:
         self.device = get_device()
 
         # load the trained model
-        self.model = ResNet().to(self.device)
+        self.model = Net().to(self.device)
         self.model.load_state_dict(torch.load(path + name, map_location=self.device))
 
         # put the network in eval mode
@@ -36,15 +38,28 @@ class Model:
             y_pred = self.model(torch.from_numpy(image)[None, :, :, :].to(self.device))
 
             # convert tensor to numpy array
-            y_pred_np = y_pred[0].cpu().detach().numpy()
+            y_pred = y_pred[0].cpu().detach()
+
+            # y_pred_prob = softmax(y_pred)
+
+            y_pred_prob = y_pred.numpy().tolist()
 
             # convert logits to probabilities
-            y_pred_prob = (np.exp(y_pred_np) / np.exp(y_pred_np).sum()).tolist()
 
             # store probabilities
             predicted_prob.append(y_pred_prob)
 
         return predicted_prob
+
+    def get_loss(self, predicted, labels):
+        predicted = torch.tensor(predicted)  # 2500, 10
+        labels = torch.tensor(labels).squeeze().float()  # 2500, 1
+        # print(labels.shape, predicted.shape)
+        return -torch.sum(labels * torch.log(predicted))
+
+    def normalize(self, images, labels):
+        value = self.get_loss()
+        return np.log(value / (1 - value))
 
 
 if __name__ == "__main__":

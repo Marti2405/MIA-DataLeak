@@ -112,6 +112,10 @@ def log_gaussian_plot(gaussian_known: Gaussian, gaussian_private: Gaussian):
     plt.savefig(f"{BASE_DIR}experiment-{i}/gaussian.jpg", dpi=300)
 
 
+def get_or_create_log_dir() -> str:
+    files = os.listdir("./results")
+
+
 def evaluate(percentage, model_name):
     logging.info(f"Started Evaluation For (percentage = {percentage})")
     # get known training dataset and private dataset.
@@ -136,6 +140,9 @@ def evaluate(percentage, model_name):
     test_private_x = x_test[eval_private_idx]
     test_known_y = y_train[eval_known_idx]
     test_private_y = y_test[eval_private_idx]
+
+    print(test_known_x.shape)
+    print(train_known_y.shape)
 
     # perform inference and compute the gaussians
     model = Model("../models", model_name)
@@ -193,5 +200,10 @@ def evaluate(percentage, model_name):
     log_gaussian_plot(known_gaussian, private_gaussian)
 
 
-models = ["/baseline_resnet.pth", "/baseline_resnet_3_epochs.pth"]
-evaluate(5, models[1])
+models = [
+    "/baseline_resnet.pth",
+    "/baseline_resnet_3_epochs.pth",
+    "/baseline_resnet_10_epochs.pth",
+    "/baseline_lenet.pth",
+]
+evaluate(5, models[3])

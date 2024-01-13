@@ -36,8 +36,7 @@ class MembershipPredictor:
         return (result > 1).astype(int)
 
     def get_loss(self, sample: np.ndarray, y: np.ndarray):
-        y_hat = self.model.predict(sample)
-        return np.array([1 - prob[y[i][0]] for i, prob in enumerate(y_hat)])
+        return self.model.get_loss(sample, y)
 
 
 if __name__ == "__main__":
