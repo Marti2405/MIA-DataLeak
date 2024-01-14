@@ -206,4 +206,4 @@ models = [
     "/baseline_resnet_10_epochs.pth",
     "/baseline_lenet.pth",
 ]
-evaluate(5, models[3])
+evaluate(16, models[3])

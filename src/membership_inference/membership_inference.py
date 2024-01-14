@@ -36,7 +36,9 @@ class MembershipPredictor:
         return (result > 1).astype(int)
 
     def get_loss(self, sample: np.ndarray, y: np.ndarray):
-        return self.model.get_loss(sample, y)
+        print(sample.shape, y.shape)
+        model_output = self.model.predict(sample)
+        return self.model.get_loss(model_output, y)
 
 
 if __name__ == "__main__":

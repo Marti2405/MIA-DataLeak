@@ -1,7 +1,8 @@
 import numpy as np
 from tqdm import tqdm
 import torch
-from torch.nn.functional import softmax, cross_entropy
+from torch.nn import CrossEntropyLoss
+from torch.nn.functional import softmax, cross_entropy, one_hot
 
 from .utils import *
 from .data_loader import DataLoader
@@ -10,6 +11,7 @@ from .lenet_architecture import Net
 
 MODEL_PATH = "../../models/"
 MODEL_NAME = "baseline_resnet.pth"
+EPSILON = 0.00000000000001
 
 
 class Model:
@@ -22,6 +24,7 @@ class Model:
 
         # put the network in eval mode
         self.model.eval()
+        self.loss_fn = CrossEntropyLoss()
 
     def predict(self, images):
         """
@@ -40,9 +43,9 @@ class Model:
             # convert tensor to numpy array
             y_pred = y_pred[0].cpu().detach()
 
-            # y_pred_prob = softmax(y_pred)
+            y_pred_prob = softmax(y_pred, dim=0)
 
-            y_pred_prob = y_pred.numpy().tolist()
+            y_pred_prob = y_pred_prob.numpy().tolist()
 
             # convert logits to probabilities
 
@@ -52,14 +55,16 @@ class Model:
         return predicted_prob
 
     def get_loss(self, predicted, labels):
-        predicted = torch.tensor(predicted)  # 2500, 10
-        labels = torch.tensor(labels).reshape().float()  # 2500, 1
-        # print(labels.shape, predicted.shape)
-        return -torch.sum(labels * torch.log(predicted))
+        predicted = torch.tensor(predicted)
+        labels = one_hot(torch.tensor(labels), num_classes=10).squeeze(dim=1)
+        log_loss = torch.log(predicted + EPSILON)
+        loss = labels * log_loss
+        loss = -torch.sum(loss, dim=-1)
+        numpy_output = loss.detach().cpu().numpy()
+        return numpy_output
 
-    def normalize(self, images, labels):
-        value = self.get_loss(images, labels)
-        return np.log(value / (1 - value))
+    def normalize(self, loss):
+        return np.log(loss / (1 - loss) + EPSILON)
 
 
 if __name__ == "__main__":

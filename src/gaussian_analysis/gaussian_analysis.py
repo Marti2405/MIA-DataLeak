@@ -19,10 +19,8 @@ class GaussianAnalysis:
         known_prob = self.model.predict(known)
         unknown_prob = self.model.predict(unknown)
 
-        print(test_known.shape)
-
-        known_loss_array = [self.model.get_loss(known_prob, test_known)]
-        unknown_loss_array = [self.model.get_loss(unknown_prob, test_unknown)]
+        known_loss_array = self.model.get_loss(known_prob, test_known)
+        unknown_loss_array = self.model.get_loss(unknown_prob, test_unknown)
 
         return known_loss_array, unknown_loss_array
 
@@ -60,6 +58,7 @@ class GaussianAnalysis:
         Input: Loss array
         Output: mean, standard deviation
         """
+        print(data.shape)
         if not self.check_normal_distribution(data):
             # raise Exception("Not normally distributed!")
             print("warning")
