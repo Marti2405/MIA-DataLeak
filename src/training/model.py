@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 import torch
+from torch.nn.functional import softmax
 
 from .utils import *
 from .data_loader import DataLoader
@@ -37,14 +38,14 @@ class Model:
             y_pred = self.model(torch.from_numpy(image)[None, :, :, :].to(self.device))
 
             # convert tensor to numpy array
-            y_pred_np = y_pred[0].cpu().detach().numpy()
+            y_pred_np = y_pred[0].cpu().detach()
 
             # convert logits to probabilities
-            y_pred_prob = (np.exp(y_pred_np) / np.exp(y_pred_np).sum()).tolist()
+            y_pred_prob = softmax(y_pred_np).numpy().tolist() 
 
             # store probabilities
             predicted_prob.append(y_pred_prob)
-
+        
         return predicted_prob
 
 
