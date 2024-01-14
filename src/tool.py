@@ -1,10 +1,8 @@
-import sys
-import argparse
 import numpy as np
 import logging
 import os
+import shutil
 import seaborn as sn
-import datetime
 import json
 import matplotlib.pyplot as plt
 
@@ -16,7 +14,24 @@ from membership_inference.Gaussian import Gaussian
 from gaussian_analysis.gaussian_analysis import GaussianAnalysis
 from training.model import Model
 
+
 logging.getLogger().setLevel(logging.INFO)
+
+# define results folder path
+RESULTS_PATH = "../results/"
+DATASET_PATH = "../data/raw_dataset/"
+EXPERIMENT_NAME = 'lenet_100_epochs'
+
+
+def create_results_directory():
+    logging.info("create results directory...")
+    if not os.path.exists(RESULTS_PATH):
+        os.makedirs(RESULTS_PATH)
+
+    if os.path.exists(RESULTS_PATH + EXPERIMENT_NAME):
+        shutil.rmtree(RESULTS_PATH + EXPERIMENT_NAME)
+
+    os.makedirs(RESULTS_PATH + EXPERIMENT_NAME)
 
 
 def confusion_matrix(pred_know: np.ndarray, pred_private: np.ndarray) -> tuple:
@@ -31,6 +46,7 @@ def confusion_matrix(pred_know: np.ndarray, pred_private: np.ndarray) -> tuple:
 
 def to_rate(confusion_matrix: tuple) -> tuple:
     tp, fp, tn, fn = confusion_matrix
+
     # Compute True positive rate...
     fpr = fp / (fp + tn) * 100
     tpr = tp / (tp + fn) * 100
@@ -60,22 +76,16 @@ def save_confusion_matrix(cf, name):
     plt.title(f"Confusion Matrix - {name}")
 
     # Save the plot
-    plt.savefig(f"{BASE_DIR}confusion_matrix_{name}.jpg", dpi=300)
+    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/confusion_matrix_{name}.jpg", dpi=300)
     plt.show()
-
-
-BASE_DIR = "./results/"
 
 
 def log_results(cf_train, cf_test, train_ratios, test_ratios) -> None:
     metrics_dict = to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios)
-    i = os.listdir(BASE_DIR)
-
-    dirname = f"experiment-{len(i)}"
-    os.mkdir(f"{BASE_DIR}{dirname}")
+    i = os.listdir(RESULTS_PATH)
 
     # raw metrics
-    with open(f"{BASE_DIR}{dirname}/data.json", "w", encoding="utf-8") as f:
+    with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/data.json", "w", encoding="utf-8") as f:
         json.dump(metrics_dict, f, ensure_ascii=False, indent=4)
 
     # plot
@@ -108,14 +118,18 @@ def to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios) -> dict:
 
 def log_gaussian_plot(gaussian_known: Gaussian, gaussian_private: Gaussian):
     gaussian_known.compare(gaussian_private)
-    i = len(os.listdir(BASE_DIR))
-    plt.savefig(f"{BASE_DIR}experiment-{i}/gaussian.jpg", dpi=300)
+    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/gaussian.jpg", dpi=300)
+    plt.show()
 
 
 def evaluate(percentage, model_name):
     logging.info(f"Started Evaluation For (percentage = {percentage})")
+
+    # create the results folder
+    create_results_directory()
+
     # get known training dataset and private dataset.
-    data_loader = DataLoader(path="../data/raw_dataset")
+    data_loader = DataLoader(path=DATASET_PATH)
     (x_train, y_train), (x_test, y_test) = data_loader.load_data()
 
     sampler = Sampler()
@@ -143,13 +157,14 @@ def evaluate(percentage, model_name):
     membership_predictor = MembershipPredictor(model)
 
     logging.info("getting loss arrays...")
+
     # perform inference on training data.
     known_loss_array, unknown_loss_array = gaussian_analysis.get_loss_arrays(
         train_known_x, train_private_x, train_known_y, train_private_y
     )
-    gaussian_analysis.plot_loss_arrays(known_loss_array, unknown_loss_array)
-    plt.show()
-    plt.savefig(f"{BASE_DIR}/losses.jpg", dpi=300)
+    fig = gaussian_analysis.plot_loss_arrays(known_loss_array, unknown_loss_array)
+    fig.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses.jpg", dpi=300)
+
     # get normal dist parameters.
     known_mean, known_std = gaussian_analysis.compute_mean_and_std(known_loss_array)
     private_mean, private_std = gaussian_analysis.compute_mean_and_std(
@@ -168,6 +183,7 @@ def evaluate(percentage, model_name):
     train_private_classifications = membership_predictor.predict(
         known_gaussian, private_gaussian, train_private_x, train_private_y
     )
+
     # predict test:
     test_known_classifications = membership_predictor.predict(
         known_gaussian, private_gaussian, test_known_x, test_known_y
@@ -193,5 +209,12 @@ def evaluate(percentage, model_name):
     log_gaussian_plot(known_gaussian, private_gaussian)
 
 
-models = ["/baseline_resnet.pth", "/baseline_resnet_3_epochs.pth"]
-evaluate(5, models[1])
+if __name__ == "__main__":
+    # understand the code
+    # bring the modifications made in the other version (kde, CE computation)
+    models = [
+        "/baseline_resnet.pth",
+        "/baseline_resnet_3_epochs.pth",
+        "/baseline_lenet.pth",
+    ]
+    evaluate(5, models[2])
