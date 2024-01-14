@@ -5,6 +5,7 @@ import torch
 from .utils import *
 from .data_loader import DataLoader
 from .resnet_architecture import ResNet
+from .lenet_architecture import Net
 
 MODEL_PATH = "../../models/"
 MODEL_NAME = "baseline_resnet.pth"
@@ -15,7 +16,7 @@ class Model:
         self.device = get_device()
 
         # load the trained model
-        self.model = ResNet().to(self.device)
+        self.model = Net().to(self.device)
         self.model.load_state_dict(torch.load(path + name, map_location=self.device))
 
         # put the network in eval mode
