@@ -13,15 +13,30 @@ from membership_inference.membership_inference import MembershipPredictor
 from membership_inference.Gaussian import Gaussian
 from gaussian_analysis.gaussian_analysis import GaussianAnalysis
 from training.model import Model
+from constants import EPSILON
 
 
 logging.getLogger().setLevel(logging.INFO)
 
+# define the type of loss
+LOSS_TYPE = "normalized_probability"
+
 # define results folder path
 RESULTS_PATH = "../results/"
 DATASET_PATH = "../data/raw_dataset/"
-EXPERIMENT_NAME = 'lenet_100_epochs'
+EXPERIMENT_NAME = f'lenet_100_epochs_{LOSS_TYPE}_loss'
 
+
+def compute_loss(predictions_prob, loss_type):
+    print("Loss type: ", loss_type)
+    if loss_type == "probability":
+        return np.array([1 - prob for prob in predictions_prob])
+    elif loss_type == "cross_entropy":
+        return np.array([-np.log(prob) for prob in predictions_prob])
+    elif loss_type == "normalized_probability":
+        return np.log(predictions_prob / (1 - predictions_prob + EPSILON))
+    else:
+        raise Exception("This type of loss it not defined.")
 
 def create_results_directory():
     logging.info("create results directory...")
@@ -153,8 +168,8 @@ def evaluate(percentage, model_name):
 
     # perform inference and compute the gaussians
     model = Model("../models", model_name)
-    gaussian_analysis = GaussianAnalysis(model)
-    membership_predictor = MembershipPredictor(model)
+    gaussian_analysis = GaussianAnalysis(model, compute_loss, LOSS_TYPE)
+    membership_predictor = MembershipPredictor(model, compute_loss, LOSS_TYPE)
 
     logging.info("getting loss arrays...")
 
