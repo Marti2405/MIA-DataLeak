@@ -34,12 +34,16 @@ class GaussianAnalysis:
         Input: Loss arrays for Known/ Unknown Datasets
         Output: Plot of both losses
         """
-        plt.figure(figsize=(10, 6))
+        fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
 
-        _, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+        fig.set_size_inches(10, 6)
 
         axs[0].hist(arr1, bins=20)
         axs[1].hist(arr2, bins=20)
+
+        plt.show()
+
+        return fig
 
     def check_normal_distribution(self, data):
         """
