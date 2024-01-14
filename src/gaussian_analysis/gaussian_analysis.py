@@ -3,12 +3,16 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import numpy as np
 
+EPSILON = 1e-7
 
 class GaussianAnalysis:
     model: Model
 
-    def __init__(self, model):
+    def __init__(self, model, compute_loss, loss_type):
         self.model = model
+        # function that computes the type of chosen loss
+        self.compute_loss = compute_loss
+        self.loss_type = loss_type
 
     def get_loss_arrays(self, known, unknown, test_known, test_unknown):
         """
@@ -19,14 +23,18 @@ class GaussianAnalysis:
         known_prob = self.model.predict(known)
         unknown_prob = self.model.predict(unknown)
 
-        known_loss_array = [
-            1 - prob[test_known[i][0]] for i, prob in enumerate(known_prob)
-        ]
-        unknown_loss_array = [
-            1 - prob[test_unknown[i][0]] for i, prob in enumerate(unknown_prob)
-        ]
+        predictions_prob_known = np.array([
+            prob[test_known[i][0]] for i, prob in enumerate(known_prob)
+        ])
 
-        return known_loss_array, unknown_loss_array
+        predictions_prob_unknown = np.array([
+            prob[test_unknown[i][0]] for i, prob in enumerate(unknown_prob)
+        ])
+
+        loss_known = self.compute_loss(predictions_prob_known, self.loss_type)
+        loss_unknown = self.compute_loss(predictions_prob_unknown, self.loss_type)
+
+        return loss_known, loss_unknown
 
     def plot_loss_arrays(self, arr1, arr2):
         """
