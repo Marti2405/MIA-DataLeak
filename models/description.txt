@@ -1,0 +1,9 @@
+baseline_resne
+- is the ResNet18 architecture
+
+baseline_lenet5_3 
+- is the classic LeNet5 that has each number of filters multipled by 3
+- because the original LeNet5 was applied on 1-channel images and we are using RGB images
+
+baseline_lenet5
+- is the classic LeNet5 without a filter multiplier
