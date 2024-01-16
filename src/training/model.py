@@ -16,8 +16,15 @@ class Model:
     def __init__(self, path=MODEL_PATH, name=MODEL_NAME):
         self.device = get_device()
 
+        print(name)
+        # set the filter multiplier
+        if "lenet5_3" in name:
+            filter_multiplier = 3
+        else:
+            filter_multiplier = 1
+
         # load the trained model
-        self.model = Net().to(self.device)
+        self.model = Net(filter_multiplier=filter_multiplier).to(self.device)
         self.model.load_state_dict(torch.load(path + name, map_location=self.device))
 
         # put the network in eval mode

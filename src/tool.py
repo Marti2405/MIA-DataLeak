@@ -19,7 +19,7 @@ from constants import EPSILON
 logging.getLogger().setLevel(logging.INFO)
 
 # define the type of loss
-LOSS_TYPE = "normalized_probability"
+LOSS_TYPE = "probability"
 
 # define results folder path
 RESULTS_PATH = "../results/"
@@ -231,5 +231,7 @@ if __name__ == "__main__":
         "/baseline_resnet.pth",
         "/baseline_resnet_3_epochs.pth",
         "/baseline_lenet.pth",
+        "/baseline_lenet5_3_100_epochs.pth",
+        "/baseline_lenet5_100_epochs.pth"
     ]
-    evaluate(5, models[2])
+    evaluate(5, models[-1])
