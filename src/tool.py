@@ -30,7 +30,7 @@ EXPERIMENT_NAME = f'lenet_100_epochs_{LOSS_TYPE}_loss'
 def compute_loss(predictions_prob, loss_type):
     print("Loss type: ", loss_type)
     if loss_type == "probability":
-        return np.array([1 - prob for prob in predictions_prob])
+        return np.array([prob for prob in predictions_prob])
     elif loss_type == "cross_entropy":
         return np.array([-np.log(prob) for prob in predictions_prob])
     elif loss_type == "normalized_probability":
@@ -234,4 +234,4 @@ if __name__ == "__main__":
         "/baseline_lenet5_3_100_epochs.pth",
         "/baseline_lenet5_100_epochs.pth"
     ]
-    evaluate(5, models[-1])
+    evaluate(5, models[-2])
