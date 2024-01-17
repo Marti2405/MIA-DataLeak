@@ -1,10 +1,12 @@
 import numpy as np
 from tqdm import tqdm
 import torch
+from torch.nn.functional import softmax
 
 from .utils import *
 from .data_loader import DataLoader
 from .resnet_architecture import ResNet
+from .lenet_architecture import Net
 
 MODEL_PATH = "../../models/"
 MODEL_NAME = "baseline_resnet.pth"
@@ -14,8 +16,15 @@ class Model:
     def __init__(self, path=MODEL_PATH, name=MODEL_NAME):
         self.device = get_device()
 
+        print(name)
+        # set the filter multiplier
+        if "lenet5_3" in name:
+            filter_multiplier = 3
+        else:
+            filter_multiplier = 1
+
         # load the trained model
-        self.model = ResNet().to(self.device)
+        self.model = Net(filter_multiplier=filter_multiplier).to(self.device)
         self.model.load_state_dict(torch.load(path + name, map_location=self.device))
 
         # put the network in eval mode
@@ -36,14 +45,14 @@ class Model:
             y_pred = self.model(torch.from_numpy(image)[None, :, :, :].to(self.device))
 
             # convert tensor to numpy array
-            y_pred_np = y_pred[0].cpu().detach().numpy()
+            y_pred_np = y_pred[0].cpu().detach()
 
             # convert logits to probabilities
-            y_pred_prob = (np.exp(y_pred_np) / np.exp(y_pred_np).sum()).tolist()
+            y_pred_prob = softmax(y_pred_np).numpy().tolist() 
 
             # store probabilities
             predicted_prob.append(y_pred_prob)
-
+        
         return predicted_prob
 
 

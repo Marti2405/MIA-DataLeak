@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from statistics import NormalDist
+import seaborn as sn
 
 
 class Gaussian:
@@ -9,20 +10,20 @@ class Gaussian:
     def __init__(self, mean, std):
         self.dist = NormalDist(mean, std)
 
-    def hist(self):
+    def kde(self):
         sample = np.random.normal(self.dist.mean, self.dist.stdev, 500)
-        plt.hist(sample)
+        sn.kdeplot(sample)
 
     def plot(self):
-        self.hist()
+        self.kde()
         plt.show()
 
     def compare(self, other, x=None):
-        self.hist()
-        other.hist()
+        self.kde()
+        other.kde()
         if x:
             plt.axvline(x=x, color="red", linestyle="--", alpha=0.5)
-        plt.show()
+        
 
     def z_score(self, x: float):
         return self.dist.zscore(x)

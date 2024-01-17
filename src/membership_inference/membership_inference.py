@@ -8,8 +8,11 @@ from training.model import Model
 class MembershipPredictor:
     model: Model
 
-    def __init__(self, model):
+    def __init__(self, model, compute_loss, loss_type):
         self.model = model
+        # function that computes the type of chosen loss
+        self.compute_loss = compute_loss
+        self.loss_type = loss_type
 
     def _predict(
         self,
@@ -37,8 +40,10 @@ class MembershipPredictor:
 
     def get_loss(self, sample: np.ndarray, y: np.ndarray):
         y_hat = self.model.predict(sample)
-        return np.array([1 - prob[y[i][0]] for i, prob in enumerate(y_hat)])
 
+        predictions_prob = np.array([prob[y[i][0]] for i, prob in enumerate(y_hat)])
+
+        return self.compute_loss(predictions_prob, self.loss_type)
 
 if __name__ == "__main__":
     training_gaussian = Gaussian(0, 1)

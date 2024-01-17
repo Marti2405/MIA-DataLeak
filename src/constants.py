@@ -3,3 +3,4 @@ dataset_path: str = "../../data/cifar-10-batches-py"
 TRAIN_SIZE: int = 50000
 TEST_SIZE: int = 10000
 BATCH_SIZE: int = 10000
+EPSILON = 1E-31
