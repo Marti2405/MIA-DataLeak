@@ -10,9 +10,9 @@ def plot_confusion_matrix(cf, name: str):
 
     # Create a seaborn heatmap
     sns.heatmap(
-        cf_array,
+        cf_array/np.sum(cf_array),
         annot=True,
-        fmt="g",
+        fmt='.2%',
         xticklabels=["True", "False"],
         yticklabels=["True", "False"],
         cmap="crest"
