@@ -1,4 +1,4 @@
-baseline_resne
+baseline_resnet
 - is the ResNet18 architecture
 
 baseline_lenet5_3 
