@@ -15,7 +15,7 @@ class KLDivergence:
 
     epsilon = 1e-32
 
-    def __compute_continuous(self, mu_p, sigma_p, mu_q, sigma_q):
+    def compute_continuous_single(self, mu_p, sigma_p, mu_q, sigma_q):
         """
         This auxiliary method computes the KL Divergence between 2 continuous
         Gaussian distributions.
@@ -44,7 +44,7 @@ class KLDivergence:
 
         # treat the case when only a pair of distributions has been passed
         if type(mus_p) != list and type(mus_p) != np.ndarray:
-            return [self.__compute_continuous(mus_p, sigmas_p, mus_q, sigmas_q)]
+            return [self.compute_continuous_single(mus_p, sigmas_p, mus_q, sigmas_q)]
 
         # test if all input lists have the same length
         condition = len(mus_p) == len(sigmas_p) == len(mus_q) == len(sigmas_q)
@@ -56,12 +56,12 @@ class KLDivergence:
         # for each pair compute and store the KL Divergence
         for mu_p, sigma_p, mu_q, sigma_q in zip(mus_p, sigmas_p, mus_q, sigmas_q):
             kl_divergences.append(
-                self.__compute_continuous(mu_p, sigma_p, mu_q, sigma_q)
+                self.compute_continuous_single(mu_p, sigma_p, mu_q, sigma_q)
             )
 
         return kl_divergences
 
-    def __compute_discrete(self, distrib_p, distrib_q):
+    def compute_discrete_single(self, distrib_p, distrib_q):
         """
         This auxiliary method computes the KL Divergence between 2 discrete
         distributions of any type passed as lists.
@@ -105,7 +105,7 @@ class KLDivergence:
 
         # treat the case when only a pair of distributions has been passed
         if type(distribs_p[0]) != list and type(distribs_p[0]) != np.ndarray:
-            return [self.__compute_discrete(distribs_p, distribs_q)]
+            return [self.compute_discrete_single(distribs_p, distribs_q)]
 
         # check if each list contains the same number of distributions
         distrib_p_no = len(distribs_p)
@@ -119,7 +119,7 @@ class KLDivergence:
 
         # compute the KL Divergence for each pair of input distributions
         for distrib_p, distrib_q in zip(distribs_p, distribs_q):
-            kl_divergences.append(self.__compute_discrete(distrib_p, distrib_q))
+            kl_divergences.append(self.compute_discrete_single(distrib_p, distrib_q))
 
         return kl_divergences
 
