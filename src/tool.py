@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 # local imports
 from sampling.Sampler import Sampler
 from training.data_loader import DataLoader
-from membership_inference.membership_inference import MembershipPredictor
-from membership_inference.Gaussian import Gaussian
+from membership_inference.membership_inference_kde import MembershipPredictorKDE
+from membership_inference.kernel_density_estimation import KDE
 from gaussian_analysis.gaussian_analysis import GaussianAnalysis
+from plot_creator import plot_densities
 from training.model import Model
 from constants import EPSILON
 
@@ -97,7 +98,6 @@ def save_confusion_matrix(cf, name):
 
 def log_results(cf_train, cf_test, train_ratios, test_ratios) -> None:
     metrics_dict = to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios)
-    i = os.listdir(RESULTS_PATH)
 
     # raw metrics
     with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/data.json", "w", encoding="utf-8") as f:
@@ -131,10 +131,7 @@ def to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios) -> dict:
     return {"train": train_dict, "test": test_dict}
 
 
-def log_gaussian_plot(gaussian_known: Gaussian, gaussian_private: Gaussian):
-    gaussian_known.compare(gaussian_private)
-    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/gaussian.jpg", dpi=300)
-    plt.show()
+
 
 
 def evaluate(percentage, model_name):
@@ -147,6 +144,17 @@ def evaluate(percentage, model_name):
     data_loader = DataLoader(path=DATASET_PATH)
     (x_train, y_train), (x_test, y_test) = data_loader.load_data()
 
+    # perform inference and compute the densities
+    model = Model("../models", model_name)
+    gaussian_analysis = GaussianAnalysis(model, compute_loss, LOSS_TYPE)
+
+    # get loss for each known and unknown image 
+    logging.info("getting loss arrays for the entire dataset...")
+    known_loss_array, unknown_loss_array = gaussian_analysis.get_loss_arrays(
+        x_train, x_test, y_train, y_test
+    )
+
+    # TO DO: add a loop over percentage values
     sampler = Sampler()
 
     (
@@ -156,82 +164,56 @@ def evaluate(percentage, model_name):
         eval_private_idx,
     ) = sampler.sample(percentage, eval_percentage=0.05)
 
-    train_known_x = x_train[train_known_idx]
-    train_private_x = x_test[train_private_idx]
-    train_known_y = y_train[train_known_idx]
-    train_private_y = y_test[train_private_idx]
+    # extact train known and private data
+    train_known_loss = known_loss_array[train_known_idx]
+    train_private_loss = unknown_loss_array[train_private_idx]
 
-    test_known_x = x_train[eval_known_idx]
-    test_private_x = x_test[eval_private_idx]
-    test_known_y = y_train[eval_known_idx]
-    test_private_y = y_test[eval_private_idx]
+    # extract test known and private data
+    test_known_loss = known_loss_array[eval_known_idx]
+    test_private_loss = unknown_loss_array[eval_private_idx]
 
-    # perform inference and compute the gaussians
-    model = Model("../models", model_name)
-    gaussian_analysis = GaussianAnalysis(model, compute_loss, LOSS_TYPE)
-    membership_predictor = MembershipPredictor(model, compute_loss, LOSS_TYPE)
-
-    logging.info("getting loss arrays...")
-
-    # perform inference on training data.
-    known_loss_array, unknown_loss_array = gaussian_analysis.get_loss_arrays(
-        train_known_x, train_private_x, train_known_y, train_private_y
-    )
-    fig = gaussian_analysis.plot_loss_arrays(known_loss_array, unknown_loss_array)
+    # plot histogram of loss arrays
+    fig = gaussian_analysis.plot_loss_arrays(train_known_loss, train_private_loss)
     fig.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses.jpg", dpi=300)
 
-    # get normal dist parameters.
-    known_mean, known_std = gaussian_analysis.compute_mean_and_std(known_loss_array)
-    private_mean, private_std = gaussian_analysis.compute_mean_and_std(
-        unknown_loss_array
-    )
+    # approximate the known and unknown densities using the KDE
+    known_density = KDE(train_known_loss)
+    private_density = KDE(train_private_loss)
 
-    known_gaussian = Gaussian(known_mean, known_std)
-    logging.info(f"Found know gaussian: {known_gaussian}")
-    private_gaussian = Gaussian(private_mean, private_std)
-    logging.info(f"Found private gaussian: {private_gaussian}")
+    # instantiate the membership predictor class
+    membership_predictor_kde = MembershipPredictorKDE(known_density, private_density)
 
     # predict training:
-    train_known_classifications = membership_predictor.predict(
-        known_gaussian, private_gaussian, train_known_x, train_known_y
+    train_known_pred = membership_predictor_kde.predict(
+        train_known_loss
     )
-    train_private_classifications = membership_predictor.predict(
-        known_gaussian, private_gaussian, train_private_x, train_private_y
+    train_private_pred = membership_predictor_kde.predict(
+        train_private_loss
     )
 
     # predict test:
-    test_known_classifications = membership_predictor.predict(
-        known_gaussian, private_gaussian, test_known_x, test_known_y
+    test_known_pred = membership_predictor_kde.predict(
+        test_known_loss
     )
-    test_private_classifications = membership_predictor.predict(
-        known_gaussian, private_gaussian, test_private_x, test_private_y
+    test_private_pred = membership_predictor_kde.predict(
+        test_private_loss
     )
 
     # compute metrics
-    cf_train = confusion_matrix(
-        train_known_classifications, train_private_classifications
-    )
+    cf_train = confusion_matrix(train_known_pred, train_private_pred)
     logging.info(f"train confusion matrix: {cf_train}")
-    cf_test = confusion_matrix(test_known_classifications, test_private_classifications)
-    logging.info(f"test confusion matrix: {cf_train}")
+    cf_test = confusion_matrix(test_known_pred, test_private_pred)
+    logging.info(f"test confusion matrix: {cf_test}")
 
     # ratios
     train_ratios = to_rate(cf_train)
     test_ratios = to_rate(cf_test)
 
-    # log results.
+    # log results
     log_results(cf_train, cf_test, train_ratios, test_ratios)
-    log_gaussian_plot(known_gaussian, private_gaussian)
-
+    plot_densities(known_density, train_known_loss, private_density, train_private_loss, RESULTS_PATH, EXPERIMENT_NAME)
+    
 
 if __name__ == "__main__":
-    # understand the code
-    # bring the modifications made in the other version (kde, CE computation)
-    models = [
-        "/baseline_resnet.pth",
-        "/baseline_resnet_3_epochs.pth",
-        "/baseline_lenet.pth",
-        "/baseline_lenet5_3_100_epochs.pth",
-        "/baseline_lenet5_100_epochs.pth"
-    ]
-    evaluate(5, models[-2])
+    models = ["/baseline_lenet5_100_epochs.pth"]
+    evaluate(5, models[0])
