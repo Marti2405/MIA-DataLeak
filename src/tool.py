@@ -15,6 +15,8 @@ from gaussian_analysis.gaussian_analysis import GaussianAnalysis
 from plot_creator import plot_densities
 from training.model import Model
 from constants import EPSILON
+from kl_divergence.kl_divergence import KLDivergence, KLDivergenceVisualizer
+
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -131,9 +133,6 @@ def to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios) -> dict:
     return {"train": train_dict, "test": test_dict}
 
 
-
-
-
 def evaluate(percentage, model_name):
     logging.info(f"Started Evaluation For (percentage = {percentage})")
 
@@ -211,8 +210,12 @@ def evaluate(percentage, model_name):
 
     # log results
     log_results(cf_train, cf_test, train_ratios, test_ratios)
-    plot_densities(known_density, train_known_loss, private_density, train_private_loss, RESULTS_PATH, EXPERIMENT_NAME)
+    plot_densities(train_known_loss, train_private_loss, RESULTS_PATH, EXPERIMENT_NAME)
     
+    # compute the KL Divergence
+    kl_divergence = KLDivergence()
+    kl_divergence_value = kl_divergence.compute_discrete_single(train_known_loss, train_private_loss)
+    print(f"The KL Divergence value is {kl_divergence_value}.")
 
 if __name__ == "__main__":
     models = ["/baseline_lenet5_100_epochs.pth"]
