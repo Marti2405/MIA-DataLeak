@@ -3,20 +3,8 @@ import json
 import shutil
 import logging
 import numpy as np
-from util.plot_creator import plot_confusion_matrix
-from constants import RESULTS_PATH, EXPERIMENT_NAME, EPSILON
+from constants import RESULTS_PATH, EXPERIMENT_NAME
 
-
-def compute_loss(predictions_prob, loss_type):
-    print("Loss type: ", loss_type)
-    if loss_type == "probability":
-        return np.array([prob for prob in predictions_prob])
-    elif loss_type == "cross_entropy":
-        return np.array([-np.log(prob) for prob in predictions_prob])
-    elif loss_type == "normalized_probability":
-        return np.log(predictions_prob / (1 - predictions_prob + EPSILON))
-    else:
-        raise Exception("This type of loss it not defined.")
 
 def create_results_directory():
     logging.info("create results directory...")
@@ -49,16 +37,12 @@ def to_rate(confusion_matrix: tuple) -> tuple:
 
     return tpr, fpr, tnr, fnr
 
-def log_results(cf_train, cf_test, train_ratios, test_ratios) -> None:
+def log_results(cf_train, cf_test, train_ratios, test_ratios, percentage) -> None:
     metrics_dict = to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios)
 
     # raw metrics
-    with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/data.json", "w", encoding="utf-8") as f:
+    with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/results_{percentage}%.json", "w", encoding="utf-8") as f:
         json.dump(metrics_dict, f, ensure_ascii=False, indent=4)
-
-    # plot
-    plot_confusion_matrix(cf_train, "train")
-    plot_confusion_matrix(cf_test, "test")
 
 def to_dict(cf: tuple, ratios: tuple) -> dict:
     return {
@@ -80,3 +64,4 @@ def to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios) -> dict:
     train_dict = to_dict(cf_train, train_ratios)
     test_dict = to_dict(cf_test, test_ratios)
     return {"train": train_dict, "test": test_dict}
+
