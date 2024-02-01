@@ -33,18 +33,19 @@ def plot_densities(
     train_known_loss: np.ndarray,
     train_private_loss: np.ndarray,
     percentage: int,
+    dataset: str,
     x: float = None,
 ):
     sns.kdeplot(train_known_loss, fill=True, common_norm=False, alpha=.5, color=(0.48942421, 0.72854938, 0.56751036))
     sns.kdeplot(train_private_loss, fill=True, common_norm=False, alpha=.5, color=(0.14573579, 0.29354139, 0.49847009))
     plt.xlabel(f"{LOSS_TYPE.capitalize()}")
-    plt.legend(["Known train data", "Private train data"])
-    plt.title(f"Density of known and private train data\n{percentage}% of leaked training data")
+    plt.legend(["Known training data", "Private data"])
+    plt.title(f"Density of known training data and private data\nused for {dataset} - {percentage}% of leaked training data")
 
     if x:
         plt.axvline(x=x, color="red", linestyle="--", alpha=0.5)
     if STORE_INTERMEDIATE_FIGURES:
-        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/density_sample_{percentage}%.jpg", dpi=300)
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/{dataset}_densities_sample_{percentage}%.jpg", dpi=300)
     if PLOT_INTERMEDIATE_FIGURES:
         plt.show(block=False)
         plt.pause(3)
@@ -61,12 +62,12 @@ def plot_loss_arrays(arr1, arr2, percentage):
     fig.set_size_inches(10, 6)
 
     axs[0].hist(arr1, bins=20, color=(0.48942421, 0.72854938, 0.56751036))
-    axs[0].set_title("Known train data")
-    axs[0].set_xlabel(f"{LOSS_TYPE}")
+    axs[0].set_title("Known training data")
+    axs[0].set_xlabel(f"{LOSS_TYPE.capitalize()}")
     axs[0].set_ylabel("Count")
 
     axs[1].hist(arr2, bins=20, color=(0.14573579, 0.29354139, 0.49847009))
-    axs[1].set_title("Private train data")
+    axs[1].set_title("Private data")
     axs[1].set_xlabel(f"{LOSS_TYPE}")
 
     fig.suptitle(f"Histograms of the {LOSS_TYPE} losses\n{percentage}% of leaked training data")
@@ -86,8 +87,8 @@ def plot_kl_divergence(percentages, kl_divergence_values):
 
     # create the scatter plot
     plt.plot(percentages, kl_divergence_values, marker="o", color=(0.48942421, 0.72854938, 0.56751036))
-    plt.title(f"Average KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and testing data",)
-    plt.xlabel("Percentage of disclosed training data")
+    plt.title(f"Average KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and private data",)
+    plt.xlabel("Percentage of known training data")
     plt.ylabel("KL Divergence")
 
     # save the plot as a PNG image

@@ -71,8 +71,11 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
             test_private_loss
         )
 
-        # plot densities estimated with KDE
-        plot_densities(train_known_loss, train_private_loss, percentage)
+        # plot train densities estimated with KDE
+        plot_densities(train_known_loss, train_private_loss, percentage, "training")
+
+        # plot train densities estimated with KDE
+        plot_densities(test_known_loss, test_private_loss, percentage, "testing")
 
         # compute and add the KL Divergence value
         kl_divergence_sum += KLDivergence().compute_discrete_single(train_known_loss, train_private_loss)
@@ -96,10 +99,8 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
     utils.log_results(cf_train_mean, cf_test_mean, train_ratios_mean, test_ratios_mean, percentage)
 
     # plot confusion matrices for train and test data
-    plot_confusion_matrix(cf_train_mean, "train", percentage)
+    plot_confusion_matrix(cf_train_mean, "trainining", percentage)
     plot_confusion_matrix(cf_test_mean, "test", percentage)
-
-    logging.info(f"The KL Divergence value is {round(kl_divergence_mean, 4)}")
 
     return kl_divergence_mean
 
