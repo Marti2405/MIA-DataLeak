@@ -1,7 +1,7 @@
 import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
-from constants import RESULTS_PATH, EXPERIMENT_NAME, LOSS_TYPE
+from constants import RESULTS_PATH, EXPERIMENT_NAME, LOSS_TYPE, STORE_INTERMEDIATE_FIGURES
 
 
 def plot_confusion_matrix(cf, name: str):
@@ -25,7 +25,9 @@ def plot_confusion_matrix(cf, name: str):
 
     # Save the plot
     plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/confusion_matrix_{name}.jpg", dpi=300)
-    plt.show()
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()
 
 def plot_densities(
     train_known_loss: np.ndarray,
@@ -40,8 +42,11 @@ def plot_densities(
 
     if x:
         plt.axvline(x=x, color="red", linestyle="--", alpha=0.5)
-    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/density.jpg", dpi=300)
-    plt.show()
+    if STORE_INTERMEDIATE_FIGURES:
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/density.jpg", dpi=300)
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()
 
 def plot_loss_arrays(arr1, arr2):
     """
@@ -64,5 +69,28 @@ def plot_loss_arrays(arr1, arr2):
 
     fig.suptitle(f"Histograms of the {LOSS_TYPE} losses")
 
-    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses.jpg", dpi=300)
-    plt.show()
+    if STORE_INTERMEDIATE_FIGURES:
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses.jpg", dpi=300)
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()
+
+
+def plot_kl_divergence(percentages, kl_divergence_values):
+    """
+    Plot and store a scatter plot of the KL Divergence values.
+    """
+
+    # create the scatter plot
+    plt.plot(percentages, kl_divergence_values, marker="o", color=(0.48942421, 0.72854938, 0.56751036))
+    plt.title(f"KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and testing data",)
+    plt.xlabel("Percentage of disclosed data")
+    plt.ylabel("KL Divergence")
+
+    # save the plot as a PNG image
+    if STORE_INTERMEDIATE_FIGURES:
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/kl_divergence.jpg", dpi=300)
+
+    plt.show(block=False)
+    plt.pause(3)
+    plt.close()

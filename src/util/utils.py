@@ -4,7 +4,7 @@ import shutil
 import logging
 import numpy as np
 from util.plot_creator import plot_confusion_matrix
-from constants import RESULTS_PATH, EXPERIMENT_NAME, EPSILON
+from constants import RESULTS_PATH, EXPERIMENT_NAME, PLOT_INTERMEDIATE_FIGURES
 
 
 def create_results_directory():
@@ -45,9 +45,6 @@ def log_results(cf_train, cf_test, train_ratios, test_ratios) -> None:
     with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/data.json", "w", encoding="utf-8") as f:
         json.dump(metrics_dict, f, ensure_ascii=False, indent=4)
 
-    # plot
-    plot_confusion_matrix(cf_train, "train")
-    plot_confusion_matrix(cf_test, "test")
 
 def to_dict(cf: tuple, ratios: tuple) -> dict:
     return {
@@ -69,3 +66,4 @@ def to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios) -> dict:
     train_dict = to_dict(cf_train, train_ratios)
     test_dict = to_dict(cf_test, test_ratios)
     return {"train": train_dict, "test": test_dict}
+
