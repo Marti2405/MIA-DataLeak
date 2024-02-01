@@ -3,8 +3,7 @@ import json
 import shutil
 import logging
 import numpy as np
-from util.plot_creator import plot_confusion_matrix
-from constants import RESULTS_PATH, EXPERIMENT_NAME, PLOT_INTERMEDIATE_FIGURES
+from constants import RESULTS_PATH, EXPERIMENT_NAME
 
 
 def create_results_directory():
@@ -38,13 +37,12 @@ def to_rate(confusion_matrix: tuple) -> tuple:
 
     return tpr, fpr, tnr, fnr
 
-def log_results(cf_train, cf_test, train_ratios, test_ratios) -> None:
+def log_results(cf_train, cf_test, train_ratios, test_ratios, percentage) -> None:
     metrics_dict = to_metrics_dict(cf_train, cf_test, train_ratios, test_ratios)
 
     # raw metrics
-    with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/data.json", "w", encoding="utf-8") as f:
+    with open(f"{RESULTS_PATH}{EXPERIMENT_NAME}/results_{percentage}%.json", "w", encoding="utf-8") as f:
         json.dump(metrics_dict, f, ensure_ascii=False, indent=4)
-
 
 def to_dict(cf: tuple, ratios: tuple) -> dict:
     return {
