@@ -5,8 +5,8 @@ BATCH_SIZE: int = 10000
 SEED: int = 131574130126691614769715556035217985886
 
 # define parameters for experiments
-LOSS_TYPE = ["probability", "cross_entropy", "normalized_probability"][-1]
-PERCENTAGES = list(range(1, 4))
+LOSS_TYPE = ["probability", "cross entropy", "normalized probability"][0]
+PERCENTAGES = list(range(1, 17))
 MODEL_NAME = "/baseline_lenet5_100_epochs.pth"
 TRIALS = 10
 
