@@ -7,17 +7,6 @@ from util.plot_creator import plot_confusion_matrix
 from constants import RESULTS_PATH, EXPERIMENT_NAME, EPSILON
 
 
-def compute_loss(predictions_prob, loss_type):
-    print("Loss type: ", loss_type)
-    if loss_type == "probability":
-        return np.array([prob for prob in predictions_prob])
-    elif loss_type == "cross_entropy":
-        return np.array([-np.log(prob) for prob in predictions_prob])
-    elif loss_type == "normalized_probability":
-        return np.log(predictions_prob / (1 - predictions_prob + EPSILON))
-    else:
-        raise Exception("This type of loss it not defined.")
-
 def create_results_directory():
     logging.info("create results directory...")
 
