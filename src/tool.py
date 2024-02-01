@@ -35,7 +35,7 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
             train_private_idx,
             eval_known_idx,
             eval_private_idx,
-        ) = Sampler().sample(percentage)
+        ) = Sampler(seed=percentage).sample(percentage)
 
         # extact train known and private data
         train_known_loss = known_loss_array[train_known_idx]
