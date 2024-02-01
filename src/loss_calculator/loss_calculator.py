@@ -2,6 +2,7 @@ from training.model import Model
 import numpy as np
 from constants import EPSILON
 
+
 class LossCalculator:
     model: Model
 
@@ -35,9 +36,9 @@ class LossCalculator:
     def compute_loss(self, predictions_prob):        
         if self.loss_type == "probability":
             return np.array([prob for prob in predictions_prob])
-        elif self.loss_type == "cross_entropy":
+        elif self.loss_type == "cross entropy":
             return np.array([-np.log(prob) for prob in predictions_prob])
-        elif self.loss_type == "normalized_probability":
+        elif self.loss_type == "normalized probability":
             return np.log(predictions_prob / (1 - predictions_prob + EPSILON))
         else:
             raise Exception("This type of loss it not defined.")
