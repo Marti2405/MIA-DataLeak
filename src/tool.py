@@ -12,7 +12,7 @@ from util.plot_creator import plot_densities, plot_loss_arrays, plot_kl_divergen
 from util import utils
 from training.model import Model
 from kl_divergence.kl_divergence import KLDivergence
-from constants import DATASET_PATH, LOSS_TYPE, PERCENTAGES, MODEL_NAME, PLOT_INTERMEDIATE_FIGURES, TRIALS
+from constants import DATASET_PATH, LOSS_TYPE, PERCENTAGES, MODEL_NAME, TRIALS
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -46,8 +46,7 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
         test_private_loss = unknown_loss_array[eval_private_idx]
 
         # plot histogram of loss arrays
-        if PLOT_INTERMEDIATE_FIGURES:
-            plot_loss_arrays(train_known_loss, train_private_loss)
+        plot_loss_arrays(train_known_loss, train_private_loss, percentage)
 
         # approximate the known and unknown densities using the KDE
         known_density = KDE(train_known_loss)
@@ -72,8 +71,8 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
             test_private_loss
         )
 
-        if PLOT_INTERMEDIATE_FIGURES:
-            plot_densities(train_known_loss, train_private_loss)
+        # plot densities estimated with KDE
+        plot_densities(train_known_loss, train_private_loss, percentage)
 
         # compute and add the KL Divergence value
         kl_divergence_sum += KLDivergence().compute_discrete_single(train_known_loss, train_private_loss)
@@ -94,16 +93,15 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
     kl_divergence_mean = kl_divergence_sum / TRIALS
 
     # log results
-    utils.log_results(cf_train_mean, cf_test_mean, train_ratios_mean, test_ratios_mean)
+    utils.log_results(cf_train_mean, cf_test_mean, train_ratios_mean, test_ratios_mean, percentage)
 
-    # plot
-    plot_confusion_matrix(cf_train_mean, "train")
-    plot_confusion_matrix(cf_test_mean, "test")
+    # plot confusion matrices for train and test data
+    plot_confusion_matrix(cf_train_mean, "train", percentage)
+    plot_confusion_matrix(cf_test_mean, "test", percentage)
 
     logging.info(f"The KL Divergence value is {round(kl_divergence_mean, 4)}")
 
     return kl_divergence_mean
-
 
 def run_experiment():
     logging.info(f"Loss type: {LOSS_TYPE}")
