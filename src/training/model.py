@@ -1,4 +1,3 @@
-import numpy as np
 from tqdm import tqdm
 import torch
 from torch.nn.functional import softmax
@@ -48,7 +47,8 @@ class Model:
             y_pred_np = y_pred[0].cpu().detach()
 
             # convert logits to probabilities
-            y_pred_prob = softmax(y_pred_np).numpy().tolist() 
+            y_pred_prob = softmax(y_pred_np, dim=0).numpy().tolist() 
+            
 
             # store probabilities
             predicted_prob.append(y_pred_prob)
