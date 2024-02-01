@@ -16,7 +16,7 @@ def get_image(index: int) -> tuple[np.ndarray, int]:
     print(batch)
     local_index = index - batch * BATCH_SIZE
 
-    chosen_batch: dict = unpickle(f"{dataset_path}/data_batch_{batch+1}")
+    chosen_batch: dict = unpickle(f"{INPUT_DATASET_PATH}/data_batch_{batch+1}")
 
     return chosen_batch[b"data"][local_index], chosen_batch[b"labels"][local_index]
 
