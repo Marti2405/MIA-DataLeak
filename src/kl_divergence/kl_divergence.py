@@ -95,7 +95,7 @@ class KLDivergence:
                 distrib_p[index] / distrib_q[index]
             )
 
-        return kl_divergence
+        return kl_divergence / len(distrib_p)
 
     def compute_discrete(self, distribs_p, distribs_q):
         """
