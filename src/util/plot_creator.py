@@ -1,10 +1,10 @@
 import numpy as np
 import seaborn as sns
 from matplotlib import pyplot as plt
-from constants import RESULTS_PATH, EXPERIMENT_NAME, LOSS_TYPE, STORE_INTERMEDIATE_FIGURES
+from constants import RESULTS_PATH, EXPERIMENT_NAME, LOSS_TYPE, STORE_INTERMEDIATE_FIGURES, PLOT_INTERMEDIATE_FIGURES
 
 
-def plot_confusion_matrix(cf, name: str):
+def plot_confusion_matrix(cf, name: str, percentage: int):
     # Create a 2D array from the cf tuple
     cf_array = np.array([[cf[0], cf[3]], [cf[1], cf[2]]])
 
@@ -21,10 +21,10 @@ def plot_confusion_matrix(cf, name: str):
     # Set axis labels and title
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    plt.title(f"Confusion Matrix - {name}")
+    plt.title(f"Averaged {name} confusion matrix\n{percentage}% of leaked training data")
 
     # Save the plot
-    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/confusion_matrix_{name}.jpg", dpi=300)
+    plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/confusion_matrix_avg_{name}_{percentage}%.jpg", dpi=300)
     plt.show(block=False)
     plt.pause(3)
     plt.close()
@@ -32,23 +32,25 @@ def plot_confusion_matrix(cf, name: str):
 def plot_densities(
     train_known_loss: np.ndarray,
     train_private_loss: np.ndarray,
+    percentage: int,
     x: float = None,
 ):
     sns.kdeplot(train_known_loss, fill=True, common_norm=False, alpha=.5, color=(0.48942421, 0.72854938, 0.56751036))
     sns.kdeplot(train_private_loss, fill=True, common_norm=False, alpha=.5, color=(0.14573579, 0.29354139, 0.49847009))
     plt.xlabel(f"{LOSS_TYPE.capitalize()}")
     plt.legend(["Known train data", "Private train data"])
-    plt.title("Density of known and private train data")
+    plt.title(f"Density of known and private train data\n{percentage}% of leaked training data")
 
     if x:
         plt.axvline(x=x, color="red", linestyle="--", alpha=0.5)
     if STORE_INTERMEDIATE_FIGURES:
-        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/density.jpg", dpi=300)
-    plt.show(block=False)
-    plt.pause(3)
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/density_sample_{percentage}%.jpg", dpi=300)
+    if PLOT_INTERMEDIATE_FIGURES:
+        plt.show(block=False)
+        plt.pause(3)
     plt.close()
 
-def plot_loss_arrays(arr1, arr2):
+def plot_loss_arrays(arr1, arr2, percentage):
     """
     Plot both loss arrays - histograms
     Input: Loss arrays for Known/ Unknown Datasets
@@ -67,12 +69,13 @@ def plot_loss_arrays(arr1, arr2):
     axs[1].set_title("Private train data")
     axs[1].set_xlabel(f"{LOSS_TYPE}")
 
-    fig.suptitle(f"Histograms of the {LOSS_TYPE} losses")
+    fig.suptitle(f"Histograms of the {LOSS_TYPE} losses\n{percentage}% of leaked training data")
 
     if STORE_INTERMEDIATE_FIGURES:
-        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses.jpg", dpi=300)
-    plt.show(block=False)
-    plt.pause(3)
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/losses_sample_{percentage}%.jpg", dpi=300)
+    if PLOT_INTERMEDIATE_FIGURES:
+        plt.show(block=False)
+        plt.pause(3)
     plt.close()
 
 
@@ -83,8 +86,8 @@ def plot_kl_divergence(percentages, kl_divergence_values):
 
     # create the scatter plot
     plt.plot(percentages, kl_divergence_values, marker="o", color=(0.48942421, 0.72854938, 0.56751036))
-    plt.title(f"KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and testing data",)
-    plt.xlabel("Percentage of disclosed data")
+    plt.title(f"Average KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and testing data",)
+    plt.xlabel("Percentage of disclosed training data")
     plt.ylabel("KL Divergence")
 
     # save the plot as a PNG image
