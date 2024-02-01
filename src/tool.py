@@ -28,14 +28,14 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
     test_ratios_sum = np.array((0, 0, 0, 0))
     kl_divergence_sum = 0
 
-    for _ in tqdm(range(TRIALS)):
+    for iteration in tqdm(range(TRIALS)):
         # sample data indices
         (
             train_known_idx,
             train_private_idx,
             eval_known_idx,
             eval_private_idx,
-        ) = Sampler(seed=percentage).sample(percentage)
+        ) = Sampler(seed=iteration).sample(percentage)
 
         # extact train known and private data
         train_known_loss = known_loss_array[train_known_idx]
@@ -70,7 +70,7 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
         test_private_pred = membership_predictor_kde.predict(
             test_private_loss
         )
-
+        
         # plot train densities estimated with KDE
         plot_densities(train_known_loss, train_private_loss, percentage, "training")
 
