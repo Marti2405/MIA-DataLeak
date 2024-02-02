@@ -80,20 +80,20 @@ def plot_loss_arrays(arr1, arr2, percentage):
     plt.close()
 
 
-def plot_kl_divergence(percentages, kl_divergence_values):
+def plot_wasserstein_dist(percentages, wasserstein_dist_values):
     """
-    Plot and store a scatter plot of the KL Divergence values.
+    Plot and store a scatter plot of the Wasserstein distance values.
     """
 
     # create the scatter plot
-    plt.plot(percentages, kl_divergence_values, marker="o", color=(0.48942421, 0.72854938, 0.56751036))
-    plt.title(f"Average KL Divergence between the {LOSS_TYPE}\ndistributions of leaked training and private data",)
+    plt.plot(percentages, wasserstein_dist_values, marker="o", color=(0.48942421, 0.72854938, 0.56751036))
+    plt.title(f"Average Wasserstein distance between the {LOSS_TYPE}\ndistributions of leaked training and private data",)
     plt.xlabel("Percentage of known training data")
-    plt.ylabel("KL Divergence")
+    plt.ylabel("Average Wasserstein distance")
 
     # save the plot as a PNG image
     if STORE_INTERMEDIATE_FIGURES:
-        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/kl_divergence.jpg", dpi=300)
+        plt.savefig(f"{RESULTS_PATH}{EXPERIMENT_NAME}/wasserstein_distance.jpg", dpi=300)
 
     plt.show(block=False)
     plt.pause(3)
