@@ -5,15 +5,15 @@ BATCH_SIZE: int = 10000
 SEED: int = 131574130126691614769715556035217985886
 
 # define parameters for experiments
-LOSS_TYPE = ["probability", "cross entropy", "normalized probability"][0]
+LOSS_TYPE = ["probability", "cross entropy", "normalized probability"][2]
 PERCENTAGES = list(range(1, 17))
-MODEL_NAME = "/baseline_lenet5_100_epochs.pth"
+MODEL_NAME = "/defended_lenet5_100_epochs_0.01.pth"
 TRIALS = 10
 
 # define data paths
 RESULTS_PATH = "../results/"
 DATASET_PATH = "../data/raw_dataset/"
-EXPERIMENT_NAME = f'lenet_100_epochs_{LOSS_TYPE}_loss'
+EXPERIMENT_NAME = f'defended_lenet5_100_epochs_0.01_{LOSS_TYPE}_loss'
 INPUT_DATASET_PATH: str = "../../data/cifar-10-batches-py"
 
 # set options about plotting and figure storage
