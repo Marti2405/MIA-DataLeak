@@ -117,17 +117,10 @@ Consequently, the model’s parameters store statistically correlated informatio
 
 ---
 
-### Cross Entropy
+## Defense
 
-$$H(p, q) = -\sum_{x \in classes} p(x) log(q(x))$$
+![bg fit right](./img/defended_lenet5_100_epochs_0.01.png)
 
-### Probability Loss
-
-$$$$
-
-### Normalized Probability Loss
-
-$$\phi(p) = \log{(\frac{p}{1-p})}$$
 
 ---
 
@@ -177,12 +170,21 @@ $$\phi(p) = \log{(\frac{p}{1-p})}$$
 
 ---
 
-## Rates
+![bg fit](../results/lenet_100_epochs_cross%20entropy_loss/training_densities_sample_16%25.jpg)
 
-| Column 1 | Column 2 |
-| -------- | -------- |
-| Item 1   | Item 2   |
-| Item 3   | Item 4   |
+![bg fit](../results/lenet_100_epochs_cross%20entropy_loss/testing_densities_sample_1%25.jpg)
+
+---
+
+![bg fit](../results/lenet_100_epochs_normalized%20probability_loss/training_densities_sample_16%25.jpg)
+
+![bg fit](../results/lenet_100_epochs_normalized%20probability_loss/training_densities_sample_1%25.jpg)
+
+---
+
+![bg fit](../results/lenet_100_epochs_probability_loss/testing_densities_sample_16%25.jpg)
+
+![bg fit](../results/lenet_100_epochs_probability_loss/training_densities_sample_1%25.jpg)
 
 ---
 
@@ -216,6 +218,7 @@ $$\phi(p) = \log{(\frac{p}{1-p})}$$
 ---
 
 ## Conclusion
+
 
 
 ---
