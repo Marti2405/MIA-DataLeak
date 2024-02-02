@@ -1,6 +1,8 @@
 import logging
 import numpy as np
+import seaborn as sns
 from tqdm import tqdm
+from scipy.stats import wasserstein_distance
 
 # local imports
 from sampling.Sampler import Sampler
@@ -8,14 +10,14 @@ from training.data_loader import DataLoader
 from membership_inference.membership_inference_kde import MembershipPredictorKDE
 from membership_inference.kernel_density_estimation import KDE
 from loss_calculator.loss_calculator import LossCalculator
-from util.plot_creator import plot_densities, plot_loss_arrays, plot_kl_divergence, plot_confusion_matrix
+from util.plot_creator import plot_densities, plot_loss_arrays, plot_wasserstein_dist, plot_confusion_matrix
 from util import utils
 from training.model import Model
-from kl_divergence.kl_divergence import KLDivergence
 from constants import DATASET_PATH, LOSS_TYPE, PERCENTAGES, MODEL_NAME, TRIALS
 
 
 logging.getLogger().setLevel(logging.INFO)
+sns.set()
 
 
 def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
@@ -26,16 +28,16 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
     cf_test_sum = np.array((0, 0, 0, 0))
     train_ratios_sum = np.array((0, 0, 0, 0))
     test_ratios_sum = np.array((0, 0, 0, 0))
-    kl_divergence_sum = 0
+    wasserstein_dist_sum = 0
 
-    for iteration in tqdm(range(TRIALS)):
+    for iteration in tqdm(range(1, TRIALS + 1)):
         # sample data indices
         (
             train_known_idx,
             train_private_idx,
             eval_known_idx,
             eval_private_idx,
-        ) = Sampler(seed=iteration).sample(percentage)
+        ) = Sampler(seed=percentage * iteration).sample(percentage)
 
         # extact train known and private data
         train_known_loss = known_loss_array[train_known_idx]
@@ -77,8 +79,8 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
         # plot train densities estimated with KDE
         plot_densities(test_known_loss, test_private_loss, percentage, "testing")
 
-        # compute and add the KL Divergence value
-        kl_divergence_sum += KLDivergence().compute_discrete_single(train_known_loss, train_private_loss)
+        # compute and add the Wasserstein distance value
+        wasserstein_dist_sum += wasserstein_distance(train_known_loss, train_private_loss)
 
         # compute metrics and ratios and sum them
         cf_train = utils.confusion_matrix(train_known_pred, train_private_pred)
@@ -88,12 +90,12 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
         train_ratios_sum = np.add(train_ratios_sum, utils.to_rate(cf_train))
         test_ratios_sum = np.add(test_ratios_sum, utils.to_rate(cf_test))
 
-    # compute the average of the cumulated metrics and KL Divergence
+    # compute the average of the cumulated metrics and Wasserstein distance
     cf_train_mean = tuple(cf_train_sum / TRIALS)
     cf_test_mean = tuple(cf_test_sum / TRIALS)
     train_ratios_mean = tuple(train_ratios_sum / TRIALS)
     test_ratios_mean = tuple(test_ratios_sum / TRIALS)
-    kl_divergence_mean = kl_divergence_sum / TRIALS
+    wasserstein_dist_mean = wasserstein_dist_sum / TRIALS
 
     # log results
     utils.log_results(cf_train_mean, cf_test_mean, train_ratios_mean, test_ratios_mean, percentage)
@@ -102,7 +104,7 @@ def run_experiment_percentage(percentage, known_loss_array, unknown_loss_array):
     plot_confusion_matrix(cf_train_mean, "trainining", percentage)
     plot_confusion_matrix(cf_test_mean, "test", percentage)
 
-    return kl_divergence_mean
+    return wasserstein_dist_mean
 
 def run_experiment():
     logging.info(f"Loss type: {LOSS_TYPE}")
@@ -124,13 +126,13 @@ def run_experiment():
         x_train, x_test, y_train, y_test
     )
 
-    kl_divergence_values = []
+    wasserstein_dist_values = []
 
     for percentage in PERCENTAGES:
-        kl_divergence_mean = run_experiment_percentage(percentage, known_loss_array, unknown_loss_array)
-        kl_divergence_values.append(kl_divergence_mean)
+        wasserstein_dist_mean = run_experiment_percentage(percentage, known_loss_array, unknown_loss_array)
+        wasserstein_dist_values.append(wasserstein_dist_mean)
 
-    plot_kl_divergence(PERCENTAGES, kl_divergence_values)
+    plot_wasserstein_dist(PERCENTAGES, wasserstein_dist_values)
 
 if __name__ == "__main__":
     run_experiment()
