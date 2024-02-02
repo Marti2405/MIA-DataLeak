@@ -21,6 +21,7 @@ class MembershipPredictorKDE:
         p_from_unknown_density = np.array(
             [self.private_density.get_density().evaluate(x) for x in loss]
         )
-        result = p_from_known_density / p_from_unknown_density
 
-        return (result > 1).astype(int)
+        result = p_from_known_density / (p_from_known_density + p_from_unknown_density)
+
+        return (result > 0.5).astype(int)
